@@ -66,10 +66,10 @@ export default function TokenRadarChart({ token }: TokenRadarChartProps) {
 
   return (
     <div className="data-card p-4 h-96">
-      <h3 className="text-lg font-medium mb-4">Score Analysis</h3>
+      <h3 className="text-lg font-medium mb-4">Score Dimensions</h3>
       <ResponsiveContainer width="100%" height="85%">
         <RadarChart outerRadius="80%" data={radarData}>
-          <PolarGrid stroke="rgba(255,255,255,0.2)" />
+          <PolarGrid stroke="rgba(255,255,255,0.1)" />
           <PolarAngleAxis 
             dataKey="metric" 
             tick={{ fill: 'rgba(255,255,255,0.7)', fontSize: 12 }} 
@@ -84,8 +84,8 @@ export default function TokenRadarChart({ token }: TokenRadarChartProps) {
           <Radar 
             name="Token Metrics" 
             dataKey="value" 
-            stroke="rgba(146, 94, 241, 0.9)" 
-            fill="rgba(146, 94, 241, 0.4)" 
+            stroke="rgba(139, 92, 246, 0.9)" 
+            fill="rgba(139, 92, 246, 0.4)" 
             fillOpacity={0.6}
           />
           <Tooltip content={<CustomTooltip />} />

@@ -21,12 +21,30 @@ export default function TokenMetricsCards({ token }: TokenMetricsCardsProps) {
     if (num === null) return 'N/A'
     return `${num.toFixed(2)}%`
   }
+  
+  // Get score indicators
+  const getScoreClass = (score: number | null, threshold1 = 40, threshold2 = 70): string => {
+    if (score === null) return '';
+    if (score >= threshold2) return 'score-high';
+    if (score >= threshold1) return 'score-mid';
+    return 'score-low';
+  }
+
+  // Get symbol for trend indicators
+  const getScoreSymbol = (score: number | null, threshold1 = 40, threshold2 = 70): string => {
+    if (score === null) return '';
+    if (score >= threshold2) return '↑';
+    if (score >= threshold1) return '→';
+    return '↓';
+  }
 
   const metrics = [
     {
       title: 'Believer Score',
       value: token.believerScore?.toFixed(2) || 'N/A',
-      description: 'Final normalized score (0-100)'
+      description: 'Final normalized score (0-100)',
+      className: getScoreClass(token.believerScore),
+      symbol: getScoreSymbol(token.believerScore)
     },
     {
       title: 'Market Cap',
@@ -46,22 +64,39 @@ export default function TokenMetricsCards({ token }: TokenMetricsCardsProps) {
     {
       title: 'Social Percentage',
       value: formatPercent(token.warpcastPercentage),
-      description: 'Percentage of socially connected holders'
+      description: 'Percentage of socially connected holders',
+      className: getScoreClass(token.warpcastPercentage, 20, 50),
+      symbol: getScoreSymbol(token.warpcastPercentage, 20, 50)
     },
     {
       title: 'Social Cred Score',
       value: token.avgSocialCredScore?.toFixed(2) || 'N/A',
-      description: 'Average holder social credibility'
+      description: 'Average holder social credibility',
+      className: getScoreClass(token.avgSocialCredScore, 2, 5),
+      symbol: getScoreSymbol(token.avgSocialCredScore, 2, 5)
     },
     {
       title: 'Holder/MCap Ratio',
       value: token.holderToMarketCapRatio?.toFixed(4) || 'N/A',
-      description: 'Higher values may receive market cap penalty'
+      description: 'Higher values may receive market cap penalty',
+      // Inverse for this one since lower is better
+      className: token.holderToMarketCapRatio ? 
+        (token.holderToMarketCapRatio > 1 ? 'score-low' : 
+         token.holderToMarketCapRatio > 0.5 ? 'score-mid' : 'score-high') : '',
+      symbol: token.holderToMarketCapRatio ?
+        (token.holderToMarketCapRatio > 1 ? '↑' : 
+         token.holderToMarketCapRatio > 0.5 ? '→' : '↓') : ''
     },
     {
       title: 'Diversity Score',
       value: token.diversityAdjustedScore?.toFixed(2) || 'N/A',
-      description: 'Score adjusted for token concentration'
+      description: 'Score adjusted for token concentration',
+      className: getScoreClass(token.diversityAdjustedScore, 
+        token.believerScore ? token.believerScore * 0.5 : 40, 
+        token.believerScore ? token.believerScore * 0.8 : 70),
+      symbol: getScoreSymbol(token.diversityAdjustedScore,
+        token.believerScore ? token.believerScore * 0.5 : 40,
+        token.believerScore ? token.believerScore * 0.8 : 70)
     }
   ]
 
@@ -69,9 +104,16 @@ export default function TokenMetricsCards({ token }: TokenMetricsCardsProps) {
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       {metrics.map((metric, index) => (
         <div key={index} className="data-card p-4">
-          <div className="text-sm font-medium text-gray-300">{metric.title}</div>
-          <div className="text-2xl font-semibold mt-1">{metric.value}</div>
-          <div className="text-xs text-gray-400 mt-1">{metric.description}</div>
+          <div className="text-sm font-medium text-gray-400 flex items-center justify-between">
+            <span>{metric.title}</span>
+            {metric.symbol && (
+              <span className={`text-xs ${metric.className}`}>{metric.symbol}</span>
+            )}
+          </div>
+          <div className={`text-2xl font-semibold mt-2 ${metric.className || ''}`}>
+            {metric.value}
+          </div>
+          <div className="text-xs text-gray-500 mt-1">{metric.description}</div>
         </div>
       ))}
     </div>
