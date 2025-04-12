@@ -10,16 +10,17 @@ export async function GET(
     const address = params.address.toLowerCase();
 
     const query = `
-    MATCH (believerWallet:Wallet)-[r:HOLDS]->(token:Token {address:tolower($address}))
+    MATCH (believerWallet:Wallet)-[r:HOLDS]->(token:Token {address:tolower($address)})
     MATCH (believerWallet)-[:ACCOUNT*..4]-(wc:Warpcast:Account)  
     WHERE wc.fcCredScore is not null       
-    ORDER BY wc.fcCredScore DESC LIMIT 25
+    ORDER BY wc.fcCredScore DESC 
     RETURN 
       tointeger(wc.fid) as fid,
       wc.username as username,
       wc.bio as bio,
       wc.fcCredScore as fcred
     `;
+
 
     const results = await runQuery(query, { address });
     
