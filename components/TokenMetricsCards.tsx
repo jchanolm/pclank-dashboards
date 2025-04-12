@@ -23,19 +23,21 @@ export default function TokenMetricsCards({ token }: TokenMetricsCardsProps) {
   }
   
   // Get score indicators
-  const getScoreClass = (score: number | null, threshold1 = 40, threshold2 = 70): string => {
+  const getScoreClass = (score: number | null, threshold1 = 10, threshold2 = 30, threshold3 = 70): string => {
     if (score === null) return '';
-    if (score >= threshold2) return 'score-high';
-    if (score >= threshold1) return 'score-mid';
-    return 'score-low';
+    if (score >= threshold3) return 'text-emerald-400';
+    if (score >= threshold2) return 'text-emerald-200';
+    if (score >= threshold1) return 'text-yellow-300';
+    return 'text-red-400';
   }
 
   // Get symbol for trend indicators
-  const getScoreSymbol = (score: number | null, threshold1 = 40, threshold2 = 70): string => {
+  const getScoreSymbol = (score: number | null, threshold1 = 10, threshold2 = 30, threshold3 = 70): string => {
     if (score === null) return '';
-    if (score >= threshold2) return '↑';
-    if (score >= threshold1) return '→';
-    return '↓';
+    if (score >= threshold3) return '▲';
+    if (score >= threshold2) return '►';
+    if (score >= threshold1) return '▼';
+    return '▼';
   }
 
   const metrics = [
@@ -49,7 +51,8 @@ export default function TokenMetricsCards({ token }: TokenMetricsCardsProps) {
     {
       title: 'Market Cap',
       value: formatMarketCap(token.marketCap),
-      description: 'Token market capitalization'
+      description: 'Token market capitalization',
+      isMonetary: true
     },
     {
       title: 'Holder Count',
@@ -65,15 +68,15 @@ export default function TokenMetricsCards({ token }: TokenMetricsCardsProps) {
       title: 'Social Percentage',
       value: formatPercent(token.warpcastPercentage),
       description: 'Percentage of socially connected holders',
-      className: getScoreClass(token.warpcastPercentage, 20, 50),
-      symbol: getScoreSymbol(token.warpcastPercentage, 20, 50)
+      className: getScoreClass(token.warpcastPercentage, 20, 50, 80),
+      symbol: getScoreSymbol(token.warpcastPercentage, 20, 50, 80)
     },
     {
       title: 'Social Cred Score',
       value: token.avgSocialCredScore?.toFixed(2) || 'N/A',
       description: 'Average holder social credibility',
-      className: getScoreClass(token.avgSocialCredScore, 2, 5),
-      symbol: getScoreSymbol(token.avgSocialCredScore, 2, 5)
+      className: getScoreClass(token.avgSocialCredScore, 2, 5, 10),
+      symbol: getScoreSymbol(token.avgSocialCredScore, 2, 5, 10)
     },
     {
       title: 'Holder/MCap Ratio',
@@ -81,11 +84,11 @@ export default function TokenMetricsCards({ token }: TokenMetricsCardsProps) {
       description: 'Higher values may receive market cap penalty',
       // Inverse for this one since lower is better
       className: token.holderToMarketCapRatio ? 
-        (token.holderToMarketCapRatio > 1 ? 'score-low' : 
-         token.holderToMarketCapRatio > 0.5 ? 'score-mid' : 'score-high') : '',
+        (token.holderToMarketCapRatio > 1 ? 'text-red-400' : 
+         token.holderToMarketCapRatio > 0.5 ? 'text-yellow-300' : 'text-emerald-400') : '',
       symbol: token.holderToMarketCapRatio ?
-        (token.holderToMarketCapRatio > 1 ? '↑' : 
-         token.holderToMarketCapRatio > 0.5 ? '→' : '↓') : ''
+        (token.holderToMarketCapRatio > 1 ? '▼' : 
+         token.holderToMarketCapRatio > 0.5 ? '►' : '▲') : ''
     },
     {
       title: 'Diversity Score',
@@ -93,17 +96,19 @@ export default function TokenMetricsCards({ token }: TokenMetricsCardsProps) {
       description: 'Score adjusted for token concentration',
       className: getScoreClass(token.diversityAdjustedScore, 
         token.believerScore ? token.believerScore * 0.5 : 40, 
-        token.believerScore ? token.believerScore * 0.8 : 70),
+        token.believerScore ? token.believerScore * 0.8 : 70,
+        token.believerScore ? token.believerScore * 0.9 : 90),
       symbol: getScoreSymbol(token.diversityAdjustedScore,
         token.believerScore ? token.believerScore * 0.5 : 40,
-        token.believerScore ? token.believerScore * 0.8 : 70)
+        token.believerScore ? token.believerScore * 0.8 : 70,
+        token.believerScore ? token.believerScore * 0.9 : 90)
     }
   ]
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       {metrics.map((metric, index) => (
-        <div key={index} className="data-card p-4">
+        <div key={index} className="data-card p-4 transition-all hover:translate-y-[-2px]">
           <div className="text-sm font-medium text-gray-400 flex items-center justify-between">
             <span>{metric.title}</span>
             {metric.symbol && (

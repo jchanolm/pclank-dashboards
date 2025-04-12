@@ -2,15 +2,20 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { useParams } from 'next/navigation'
 import { TokenData, Believer } from '@/lib/types'
 import TokenRadarChart from '@/components/TokenRadarChart'
 import TopBelieversTable from '@/components/TopBelieversTable'
 import TokenMetricsCards from '@/components/TokenMetricsCards'
+import LoadingSpinner from '@/components/ui/LoadingSpinner'
 
-export default function TokenDetailPage({ params }: { params: { address: string } }) {
+export default function TokenDetailPage() {
   const [token, setToken] = useState<TokenData | null>(null)
   const [believers, setBelievers] = useState<Believer[]>([])
   const [loading, setLoading] = useState(true)
+  const [copiedAddress, setCopiedAddress] = useState(false)
+  const params = useParams()
+  const address = typeof params.address === 'string' ? params.address : Array.isArray(params.address) ? params.address[0] : ''
 
   useEffect(() => {
     async function fetchData() {
@@ -23,14 +28,14 @@ export default function TokenDetailPage({ params }: { params: { address: string 
         
         const tokensData = await tokensResponse.json()
         const foundToken = tokensData.fcs_data.find(
-          (t: TokenData) => t.address.toLowerCase() === params.address.toLowerCase()
+          (t: TokenData) => t.address.toLowerCase() === address.toLowerCase()
         )
         
         if (foundToken) {
           setToken(foundToken)
           
           // Get the token's top believers
-          const believersResponse = await fetch(`/api/tokens/${params.address}/believers`)
+          const believersResponse = await fetch(`/api/tokens/${address}/believers`)
           if (!believersResponse.ok) throw new Error('Failed to fetch believers')
           
           const believersData = await believersResponse.json()
@@ -43,17 +48,29 @@ export default function TokenDetailPage({ params }: { params: { address: string 
       }
     }
     
-    fetchData()
-  }, [params.address])
+    if (address) {
+      fetchData()
+    }
+  }, [address])
+
+  // Copy address to clipboard
+  const copyToClipboard = () => {
+    if (token) {
+      navigator.clipboard.writeText(token.address);
+      setCopiedAddress(true);
+      setTimeout(() => setCopiedAddress(false), 3000);
+    }
+  }
 
   if (loading) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="data-card p-20 text-center">
-          <div className="animate-pulse">
-            <div className="h-8 w-64 bg-gray-700 rounded mx-auto mb-4"></div>
-            <div className="h-4 w-40 bg-gray-800 rounded mx-auto"></div>
-          </div>
+          <LoadingSpinner 
+            size="lg" 
+            message="Loading token data..."
+            className="py-16"
+          />
         </div>
       </div>
     )
@@ -76,36 +93,58 @@ export default function TokenDetailPage({ params }: { params: { address: string 
   const getScoreHealthStatus = (score: number | null): string => {
     if (score === null) return 'Unknown';
     if (score >= 70) return 'Strong';
-    if (score >= 40) return 'Moderate';
+    if (score >= 30) return 'Moderate';
     return 'Weak';
   }
   
   const getScoreHealthClass = (score: number | null): string => {
     if (score === null) return '';
     if (score >= 70) return 'score-high';
-    if (score >= 40) return 'score-mid';
+    if (score >= 50) return 'score-high opacity-90';
+    if (score >= 30) return 'score-high opacity-75';
+    if (score >= 20) return 'score-mid';
+    if (score >= 10) return 'score-mid opacity-75';
     return 'score-low';
+  }
+  
+  const getScoreBgClass = (score: number | null): string => {
+    if (score === null) return '';
+    if (score >= 70) return 'bg-emerald-400/20';
+    if (score >= 50) return 'bg-emerald-300/20';
+    if (score >= 30) return 'bg-emerald-200/20';
+    if (score >= 20) return 'bg-yellow-300/20';
+    if (score >= 10) return 'bg-yellow-200/20';
+    return 'bg-red-400/20';
   }
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <Link href="/" className="text-gray-400 hover:text-white text-sm flex items-center space-x-1">
+          <Link href="/" className="text-gray-400 hover:text-white text-sm flex items-center space-x-1 mb-4">
             <span>←</span>
-            <span>Back to Tokens</span>
+            <span>Back to All Tokens</span>
           </Link>
-          <div className="flex items-center space-x-3 mt-2">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
             <h1 className="text-3xl font-bold">
-              {token.name} 
-              <span className="text-xl opacity-70 ml-2">{token.symbol}</span>
+              {token.name}
             </h1>
-            <div className={`px-2 py-0.5 text-xs font-medium rounded ${getScoreHealthClass(token.believerScore)} bg-opacity-20`}>
-              {getScoreHealthStatus(token.believerScore)}
+            <div className="flex items-center gap-3">
+              <span className="text-xl opacity-70 px-3 py-1 bg-black/20 rounded">{token.symbol}</span>
+              
+              <div className={`px-2.5 py-1 text-sm font-medium rounded ${getScoreBgClass(token.believerScore)}`}>
+                <span className={getScoreHealthClass(token.believerScore)}>
+                  {getScoreHealthStatus(token.believerScore)} ({token.believerScore?.toFixed(2)})
+                </span>
+              </div>
             </div>
           </div>
-          <div className="text-xs mt-1 text-gray-500 font-mono">
+          <div 
+            className="text-sm mt-2 text-gray-400 font-mono bg-black/20 px-3 py-1.5 rounded cursor-pointer hover:bg-black/30 transition-colors inline-flex items-center"
+            onClick={copyToClipboard}
+          >
             {token.address}
+            {copiedAddress && <span className="ml-2 text-green-400">✓ Copied</span>}
           </div>
         </div>
       </div>

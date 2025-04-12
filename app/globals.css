@@ -21,6 +21,7 @@ body {
   background-attachment: fixed;
   color: var(--foreground);
   min-height: 100vh;
+  font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 }
 
 .data-card {
@@ -29,6 +30,8 @@ body {
   border-radius: 0.5rem;
   backdrop-filter: blur(10px);
   transition: all 0.2s ease;
+  overflow: hidden;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
 .data-card:hover {
@@ -98,4 +101,56 @@ body {
 .btn-action:hover {
   background: rgba(139, 92, 246, 0.25);
   border-color: rgba(139, 92, 246, 0.4);
+}
+
+/* Enhanced UI elements for Palantir-inspired aesthetic */
+.bg-black\/20 {
+  background-color: rgba(0, 0, 0, 0.2) !important;
+}
+
+.bg-black\/30 {
+  background-color: rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Ensure grid lines are visible but subtle */
+.grid {
+  background-image: linear-gradient(to right, var(--border-dim) 1px, transparent 1px),
+                    linear-gradient(to bottom, var(--border-dim) 1px, transparent 1px);
+  background-size: 20px 20px;
+  background-position: center;
+}
+
+/* Improve card aesthetics */
+.score-high, .score-mid, .score-low {
+  font-weight: 600;
+}
+
+/* Fix visual issues with background graphics */
+.fixed.inset-0.bg-\[url\(\'\/grid\.svg\'\)\] {
+  opacity: 0.15 !important;
+}
+
+/* Add subtle glow to highlight key elements */
+.text-3xl.font-bold.gradient-text {
+  text-shadow: 0 0 15px rgba(139, 92, 246, 0.3);
+}
+
+/* Enhance hover states */
+.hover\:bg-black\/40:hover {
+  background-color: rgba(0, 0, 0, 0.4) !important;
+}
+
+/* Ensure proper contrast for data visualization elements */
+.recharts-layer {
+  stroke-width: 1.5;
+}
+
+/* Add subtle animation for loading states */
+@keyframes pulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 0.8; }
+}
+
+.animate-pulse > div {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
