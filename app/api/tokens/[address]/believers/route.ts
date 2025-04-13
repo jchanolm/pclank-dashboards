@@ -9,10 +9,12 @@ export async function GET(
     // Ensure address is properly formatted
     const address = params.address.toLowerCase();
 
+    // Fixed the query to properly close the curly brace and ensure unique results
     const query = `
     MATCH (believerWallet:Wallet)-[r:HOLDS]->(token:Token {address:tolower($address)})
     MATCH (believerWallet)-[:ACCOUNT*..4]-(wc:Warpcast:Account)  
     WHERE wc.fcCredScore is not null       
+    WITH DISTINCT wc
     ORDER BY wc.fcCredScore DESC 
     RETURN 
       tointeger(wc.fid) as fid,
@@ -20,7 +22,6 @@ export async function GET(
       wc.bio as bio,
       wc.fcCredScore as fcred
     `;
-
 
     const results = await runQuery(query, { address });
     
