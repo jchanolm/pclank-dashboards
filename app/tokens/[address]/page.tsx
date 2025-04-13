@@ -1,10 +1,28 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { TokenData, Believer } from '@/lib/types'
+import { TokenData } from '@/lib/types'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../../../components/ui/table"
+import { ExternalLink } from 'lucide-react'
+
+// Update Believer type to include balance
+interface Believer {
+  fid: number;
+  username: string;
+  bio: string;
+  fcred: number;
+  balance?: number;
+}
 
 export default function TokenDetailPage() {
   const [token, setToken] = useState<TokenData | null>(null)
@@ -13,6 +31,7 @@ export default function TokenDetailPage() {
   const [error, setError] = useState<string | null>(null)
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
+  const [expandedBio, setExpandedBio] = useState<number | null>(null)
   const believersPerPage = 10
   
   const params = useParams()
@@ -122,9 +141,26 @@ export default function TokenDetailPage() {
     return `${num.toFixed(2)}%`
   }
 
+  // Format token balance
+  const formatBalance = (num: number | null | undefined): string => {
+    if (num === null || num === undefined) return 'N/A'
+    if (num >= 1000000) return `${(num / 1000000).toFixed(2)}M`
+    if (num >= 1000) return `${(num / 1000).toFixed(2)}K`
+    return num.toFixed(2)
+  }
+
   // Redirect to Warpcast profile
   const goToWarpcastProfile = (username: string) => {
     window.open(`https://warpcast.com/${username}`, '_blank')
+  }
+
+  // Toggle bio expansion
+  const toggleBioExpansion = (index: number) => {
+    if (expandedBio === index) {
+      setExpandedBio(null)
+    } else {
+      setExpandedBio(index)
+    }
   }
 
   return (
@@ -178,7 +214,7 @@ export default function TokenDetailPage() {
           </div>
           
           <div className="bg-black/30 backdrop-blur-sm rounded-xl p-4 border border-gray-800 shadow-lg">
-            <div className="text-gray-400 text-sm font-medium uppercase tracking-wider mb-1">SOCIAL %</div>
+            <div className="text-gray-400 text-sm font-medium uppercase tracking-wider mb-1">% WALLETS CONNECTED TO WARPCAST</div>
             <div className="text-2xl font-bold">{formatPercent(token.warpcastPercentage)}</div>
           </div>
           
@@ -197,7 +233,7 @@ export default function TokenDetailPage() {
       {/* Top Believers */}
       <section className="mb-8">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold text-gray-200">Top Believers</h2>
+          <h2 className="text-xl font-bold text-gray-200">Holders w/Warpcast Account</h2>
           <div className="text-sm text-gray-500">{believers.length} accounts</div>
         </div>
         
@@ -205,39 +241,66 @@ export default function TokenDetailPage() {
           {believers.length > 0 ? (
             <>
               <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr>
-                      <th className="text-left py-3 px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider border-b border-gray-800">USERNAME</th>
-                      <th className="text-right py-3 px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider border-b border-gray-800">FID</th>
-                      <th className="text-right py-3 px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider border-b border-gray-800">SOCIAL CRED</th>
-                    </tr>
-                  </thead>
-                  <tbody>
+                <Table>
+                  <TableHeader>
+                    <TableRow className="border-b border-gray-800">
+                      <TableHead className="text-xs font-semibold text-gray-400 uppercase tracking-wider w-[15%]">Username</TableHead>
+                      <TableHead className="text-xs font-semibold text-gray-400 uppercase tracking-wider w-[40%]">Bio</TableHead>
+                      <TableHead className="text-xs font-semibold text-gray-400 uppercase tracking-wider text-right w-[10%]">FID</TableHead>
+                      <TableHead className="text-xs font-semibold text-gray-400 uppercase tracking-wider text-right w-[15%]">Token Balance</TableHead>
+                      <TableHead className="text-xs font-semibold text-gray-400 uppercase tracking-wider text-right w-[20%]">Social Cred</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
                     {currentBelievers.map((believer, index) => (
-                      <tr 
-                        key={`${believer.fid}-${index}`} 
-                        className={`${index % 2 === 0 ? 'bg-black/20' : 'bg-black/10'} hover:bg-black/30`}
-                      >
-                        <td 
-                          className="py-3 px-4 cursor-pointer hover:text-purple-300 border-b border-gray-800/30"
-                          onClick={() => goToWarpcastProfile(believer.username)}
+                      <React.Fragment key={`${believer.fid}-${index}`}>
+                        <TableRow 
+                          className="border-b border-gray-800/50 hover:bg-black/40"
                         >
-                          <div className="font-medium text-white">{believer.username}</div>
-                          {believer.bio && (
-                            <div className="text-xs text-gray-400 mt-1 line-clamp-1">{believer.bio}</div>
-                          )}
-                        </td>
-                        <td className="py-3 px-4 text-right text-gray-400 border-b border-gray-800/30">{believer.fid}</td>
-                        <td className="py-3 px-4 text-right border-b border-gray-800/30">
-                          <div className="inline-flex px-3 py-1 rounded-full bg-green-900/30 text-green-400 text-sm font-medium float-right">
-                            {believer.fcred.toFixed(2)}
-                          </div>
-                        </td>
-                      </tr>
+                          <TableCell 
+                            className="py-3 cursor-pointer hover:text-purple-300"
+                            onClick={() => goToWarpcastProfile(believer.username)}
+                          >
+                            <div className="flex items-center gap-1">
+                              <span className="font-medium text-white">{believer.username}</span>
+                              <ExternalLink size={14} className="text-gray-500" />
+                            </div>
+                          </TableCell>
+                          <TableCell 
+                            className="py-3 text-gray-400 text-sm cursor-pointer max-w-[300px]"
+                            onClick={() => toggleBioExpansion(index)}
+                          >
+                            {believer.bio ? (
+                              <div className={expandedBio === index ? "" : "line-clamp-1 truncate"}>
+                                {believer.bio}
+                              </div>
+                            ) : (
+                              <span className="text-gray-600 italic">No bio</span>
+                            )}
+                          </TableCell>
+                          <TableCell className="py-3 text-right text-gray-400">{believer.fid}</TableCell>
+                          <TableCell className="py-3 text-right">
+                            <div className="text-gray-300 font-mono inline-flex px-2 py-1 bg-black/30 rounded">
+                              {formatBalance(believer.balance)}
+                            </div>
+                          </TableCell>
+                          <TableCell className="py-3 text-right">
+                            <div className="inline-flex px-3 py-1 rounded-full bg-green-900/30 text-green-400 text-sm font-medium float-right">
+                              {believer.fcred.toFixed(2)}
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                        {expandedBio === index && believer.bio && (
+                          <TableRow className="bg-black/50">
+                            <TableCell colSpan={5} className="py-2 px-4 text-gray-300">
+                              <div className="text-sm">{believer.bio}</div>
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      </React.Fragment>
                     ))}
-                  </tbody>
-                </table>
+                  </TableBody>
+                </Table>
               </div>
               
               {/* Pagination */}

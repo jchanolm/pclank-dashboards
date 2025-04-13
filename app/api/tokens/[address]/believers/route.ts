@@ -16,6 +16,7 @@ export async function GET(
       ORDER BY wc.fcCredScore DESC
       RETURN 
         tointeger(wc.fid) as fid,
+        tofloat(r.balance) as balance,
         wc.username as username,
         wc.bio as bio,
         wc.fcCredScore as fcred
@@ -27,6 +28,7 @@ export async function GET(
       fid: record.get('fid') || 0,
       username: record.get('username') || '',
       bio: record.get('bio') || '',
+      balance: record.get('balance') || 0,
       fcred: record.get('fcred') || 0,
     }));
 
