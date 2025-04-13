@@ -8,11 +8,21 @@ import {
   PolarRadiusAxis, 
   Radar, 
   ResponsiveContainer, 
-  Tooltip 
+  Tooltip
 } from 'recharts'
 
 interface TokenRadarChartProps {
   token: TokenData
+}
+
+interface CustomTooltipProps {
+  active?: boolean;
+  payload?: {
+    payload: {
+      metric: string;
+      fullValue: number | null;
+    };
+  }[];
 }
 
 export default function TokenRadarChart({ token }: TokenRadarChartProps) {
@@ -52,7 +62,7 @@ export default function TokenRadarChart({ token }: TokenRadarChartProps) {
   }
 
   // Custom tooltip 
-  const CustomTooltip = ({ active, payload }: any) => {
+  const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
     if (active && payload && payload.length) {
       return (
         <div className="tooltip">

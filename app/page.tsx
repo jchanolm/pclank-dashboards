@@ -12,7 +12,6 @@ export default function Home() {
   const [sortField, setSortField] = useState<keyof TokenData>('believerScore')
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
   const [searchTerm, setSearchTerm] = useState('')
-  const [selectedTab, setSelectedTab] = useState('all-tokens')
   const [copiedAddress, setCopiedAddress] = useState<string | null>(null)
   const [currentPage, setCurrentPage] = useState(1)
   const tokensPerPage = 15
@@ -140,8 +139,7 @@ export default function Home() {
         </p>
       </div>
       
-      <Tabs defaultValue="all-tokens" className="w-full mb-6" 
-        onValueChange={(value) => setSelectedTab(value)}>
+      <Tabs defaultValue="all-tokens" className="w-full mb-6">
         <div className="mb-6">
           <TabsList className="bg-black/30 p-1 rounded-lg">
             <TabsTrigger value="all-tokens" className="px-6 py-2 text-sm">
@@ -331,10 +329,16 @@ export default function Home() {
             <h3 className="text-xl font-semibold mb-4">Select a Token to View</h3>
             <div className="flex flex-col items-center justify-center gap-6">
               <p className="text-gray-400 max-w-md">
-                Choose a token from the "All Tokens" tab or search for a specific token to view detailed analysis
+                Choose a token from the &quot;All Tokens&quot; tab or search for a specific token to view detailed analysis
               </p>
               <button 
-                onClick={() => setSelectedTab('all-tokens')}
+                onClick={() => {
+                  // Find and click the "all-tokens" tab
+                  const allTokensTab = document.querySelector('[role="tab"][value="all-tokens"]') as HTMLElement;
+                  if (allTokensTab) {
+                    allTokensTab.click();
+                  }
+                }}
                 className="px-5 py-2.5 bg-purple-800/30 text-purple-300 hover:bg-purple-800/50 rounded-lg transition-all border border-purple-700/50 text-base font-medium"
               >
                 View All Tokens

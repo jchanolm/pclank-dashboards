@@ -10,7 +10,7 @@ interface TopBelieversTableProps {
 export default function TopBelieversTable({ believers }: TopBelieversTableProps) {
   const [sortBy, setSortBy] = useState<keyof Believer>('fcred')
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading] = useState(false)
 
   const handleSort = (field: keyof Believer) => {
     if (field === sortBy) {

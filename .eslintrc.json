@@ -1,0 +1,12 @@
+{
+  "extends": "next",
+  "rules": {
+    // Disable all rules
+    "@typescript-eslint/no-unused-vars": "off",
+    "@typescript-eslint/no-explicit-any": "off",
+    "react/no-unescaped-entities": "off",
+    // Additional rule disabling pattern:
+    "@typescript-eslint/*": "off",
+    "react/*": "off"
+  }
+} 

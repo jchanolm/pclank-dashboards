@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { useParams, useRouter } from 'next/navigation'
+import { useParams } from 'next/navigation'
 import { TokenData, Believer } from '@/lib/types'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 
@@ -16,7 +16,6 @@ export default function TokenDetailPage() {
   const believersPerPage = 10
   
   const params = useParams()
-  const router = useRouter()
   const address = typeof params.address === 'string' ? params.address : Array.isArray(params.address) ? params.address[0] : ''
 
   useEffect(() => {
@@ -58,16 +57,16 @@ export default function TokenDetailPage() {
             } else {
               setError('Unexpected data format from believers endpoint')
             }
-          } catch (believersError) {
+          } catch (believersError: unknown) {
             console.error('Believers fetch error:', believersError)
-            setError(`Error fetching believers: ${believersError.message}`)
+            setError(`Error fetching believers: ${believersError instanceof Error ? believersError.message : String(believersError)}`)
           }
         } else {
           setError('Token not found')
         }
-      } catch (error) {
+      } catch (error: unknown) {
         console.error('Error:', error)
-        setError(`Error: ${error.message}`)
+        setError(`Error: ${error instanceof Error ? error.message : String(error)}`)
       } finally {
         setLoading(false)
       }
