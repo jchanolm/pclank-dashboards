@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { TokenData } from '../lib/types'
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 
 export default function Home() {
@@ -139,214 +138,176 @@ export default function Home() {
         </p>
       </div>
       
-      <Tabs defaultValue="all-tokens" className="w-full mb-6">
-        <div className="mb-6">
-          <TabsList className="bg-black/30 p-1 rounded-lg">
-            <TabsTrigger value="all-tokens" className="px-6 py-2 text-sm">
-              All Tokens
-            </TabsTrigger>
-            <TabsTrigger value="select-token" className="px-6 py-2 text-sm">
-              Select a Token
-            </TabsTrigger>
-          </TabsList>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+          <span className="text-sm text-gray-400 font-medium">
+            {filteredTokens.length} tokens
+          </span>
+          <div className="hidden sm:block h-4 border-r border-gray-700"></div>
+          <span className="text-sm text-gray-400 font-medium">
+            Sorted by: {String(sortField).replace(/([A-Z])/g, ' $1').toLowerCase()}
+            {sortDirection === 'desc' ? ' (high to low)' : ' (low to high)'}
+          </span>
         </div>
         
-        <TabsContent value="all-tokens">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-              <span className="text-sm text-gray-400 font-medium">
-                {filteredTokens.length} tokens
-              </span>
-              <div className="hidden sm:block h-4 border-r border-gray-700"></div>
-              <span className="text-sm text-gray-400 font-medium">
-                Sorted by: {String(sortField).replace(/([A-Z])/g, ' $1').toLowerCase()}
-                {sortDirection === 'desc' ? ' (high to low)' : ' (low to high)'}
-              </span>
-            </div>
-            
-            <div className="w-full sm:w-72 relative">
-              <input
-                type="text"
-                placeholder="Search by name, symbol, or address..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full px-4 py-3 bg-black/30 border border-gray-800 rounded-lg focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/50"
-              />
-              {searchTerm && (
-                <button 
-                  onClick={() => setSearchTerm('')}
-                  className="absolute right-3 top-3 text-gray-500 hover:text-gray-300"
-                >
-                  ×
-                </button>
-              )}
-            </div>
-          </div>
+        <div className="w-full sm:w-72 relative">
+          <input
+            type="text"
+            placeholder="Search by name, symbol, or address..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full px-4 py-3 bg-black/30 border border-gray-800 rounded-lg focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/50"
+          />
+          {searchTerm && (
+            <button 
+              onClick={() => setSearchTerm('')}
+              className="absolute right-3 top-3 text-gray-500 hover:text-gray-300"
+            >
+              ×
+            </button>
+          )}
+        </div>
+      </div>
 
-          {loading ? (
-            <div className="bg-black/30 backdrop-blur-sm rounded-xl border border-gray-800 shadow-lg p-20 text-center">
-              <LoadingSpinner size="lg" message="Loading token dashboard..." />
-            </div>
-          ) : (
-            <div className="bg-black/30 backdrop-blur-sm rounded-xl border border-gray-800 shadow-lg overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="bg-black/40 border-b border-gray-800">
-                      <th className="text-left py-3 px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-black/50" 
-                          onClick={() => handleSort('name')}>
-                        Token {sortField === 'name' && (sortDirection === 'asc' ? '↑' : '↓')}
-                      </th>
-                      <th className="text-right py-3 px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-black/50" 
-                          onClick={() => handleSort('believerScore')}>
-                        Believer Score {sortField === 'believerScore' && (sortDirection === 'asc' ? '↑' : '↓')}
-                      </th>
-                      <th className="text-right py-3 px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-black/50" 
-                          onClick={() => handleSort('marketCap')}>
-                        Market Cap {sortField === 'marketCap' && (sortDirection === 'asc' ? '↑' : '↓')}
-                      </th>
-                      <th className="text-right py-3 px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-black/50" 
-                          onClick={() => handleSort('walletCount')}>
-                        Holders {sortField === 'walletCount' && (sortDirection === 'asc' ? '↑' : '↓')}
-                      </th>
-                      <th className="text-right py-3 px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-black/50" 
-                          onClick={() => handleSort('warpcastPercentage')}>
-                        Social % {sortField === 'warpcastPercentage' && (sortDirection === 'asc' ? '↑' : '↓')}
-                      </th>
-                      <th className="text-right py-3 px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-black/50" 
-                          onClick={() => handleSort('avgSocialCredScore')}>
-                        Social Cred {sortField === 'avgSocialCredScore' && (sortDirection === 'asc' ? '↑' : '↓')}
-                      </th>
-                      <th className="text-center py-3 px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {currentTokens.map((token, index) => (
-                      <tr 
-                        key={token.address}
-                        className={`border-b border-gray-800/50 hover:bg-black/40 transition-colors
-                          ${index % 2 === 0 ? 'bg-black/20' : 'bg-black/10'}`}
+      {loading ? (
+        <div className="bg-black/30 backdrop-blur-sm rounded-xl border border-gray-800 shadow-lg p-20 text-center">
+          <LoadingSpinner size="lg" message="Loading token dashboard..." />
+        </div>
+      ) : (
+        <div className="bg-black/30 backdrop-blur-sm rounded-xl border border-gray-800 shadow-lg overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="bg-black/40 border-b border-gray-800">
+                  <th className="text-left py-3 px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-black/50" 
+                      onClick={() => handleSort('name')}>
+                    Token {sortField === 'name' && (sortDirection === 'asc' ? '↑' : '↓')}
+                  </th>
+                  <th className="text-right py-3 px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-black/50" 
+                      onClick={() => handleSort('believerScore')}>
+                    Believer Score {sortField === 'believerScore' && (sortDirection === 'asc' ? '↑' : '↓')}
+                  </th>
+                  <th className="text-right py-3 px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-black/50" 
+                      onClick={() => handleSort('marketCap')}>
+                    Market Cap {sortField === 'marketCap' && (sortDirection === 'asc' ? '↑' : '↓')}
+                  </th>
+                  <th className="text-right py-3 px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-black/50" 
+                      onClick={() => handleSort('walletCount')}>
+                    Holders {sortField === 'walletCount' && (sortDirection === 'asc' ? '↑' : '↓')}
+                  </th>
+                  <th className="text-right py-3 px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-black/50" 
+                      onClick={() => handleSort('warpcastPercentage')}>
+                    Social % {sortField === 'warpcastPercentage' && (sortDirection === 'asc' ? '↑' : '↓')}
+                  </th>
+                  <th className="text-right py-3 px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-black/50" 
+                      onClick={() => handleSort('avgSocialCredScore')}>
+                    Social Cred {sortField === 'avgSocialCredScore' && (sortDirection === 'asc' ? '↑' : '↓')}
+                  </th>
+                  <th className="text-center py-3 px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {currentTokens.map((token, index) => (
+                  <tr 
+                    key={token.address}
+                    className={`border-b border-gray-800/50 hover:bg-black/40 transition-colors
+                      ${index % 2 === 0 ? 'bg-black/20' : 'bg-black/10'}`}
+                  >
+                    <td className="py-4 px-4">
+                      <div>
+                        <div className="font-semibold text-white">{token.name}</div>
+                        <div className="text-sm text-gray-400">{token.symbol}</div>
+                        <div className="mt-1">
+                          <span 
+                            className="text-xs font-mono bg-black/20 px-2 py-1 rounded cursor-pointer hover:bg-black/30 transition-colors flex items-center max-w-fit"
+                            onClick={() => copyToClipboard(token.address)}
+                            title="Click to copy"
+                          >
+                            {truncateAddress(token.address)}
+                            {copiedAddress === token.address && (
+                              <span className="ml-2 text-green-400 text-xs">✓ Copied</span>
+                            )}
+                          </span>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="py-4 px-4 text-right">
+                      <div className={`inline-flex items-center px-3 py-1.5 rounded-full ${getScoreBgClass(token.believerScore)}`}>
+                        <span className={`font-semibold ${getScoreColorClass(token.believerScore)}`}>
+                          {token.believerScore ? token.believerScore.toFixed(2) : 'N/A'}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="py-4 px-4 text-right font-medium">{formatMarketCap(token.marketCap)}</td>
+                    <td className="py-4 px-4 text-right font-medium">{token.walletCount?.toLocaleString() || 'N/A'}</td>
+                    <td className="py-4 px-4 text-right font-medium">{formatPercent(token.warpcastPercentage)}</td>
+                    <td className="py-4 px-4 text-right font-medium">{formatNumber(token.avgSocialCredScore)}</td>
+                    <td className="py-4 px-4 text-center">
+                      <button 
+                        onClick={() => router.push(`/tokens/${token.address}`)}
+                        className="px-4 py-1.5 bg-purple-800/30 text-purple-300 hover:bg-purple-800/50 rounded-md transition-all border border-purple-700/50 text-sm font-medium"
                       >
-                        <td className="py-4 px-4">
-                          <div>
-                            <div className="font-semibold text-white">{token.name}</div>
-                            <div className="text-sm text-gray-400">{token.symbol}</div>
-                            <div className="mt-1">
-                              <span 
-                                className="text-xs font-mono bg-black/20 px-2 py-1 rounded cursor-pointer hover:bg-black/30 transition-colors flex items-center max-w-fit"
-                                onClick={() => copyToClipboard(token.address)}
-                                title="Click to copy"
-                              >
-                                {truncateAddress(token.address)}
-                                {copiedAddress === token.address && (
-                                  <span className="ml-2 text-green-400 text-xs">✓ Copied</span>
-                                )}
-                              </span>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="py-4 px-4 text-right">
-                          <div className={`inline-flex items-center px-3 py-1.5 rounded-full ${getScoreBgClass(token.believerScore)}`}>
-                            <span className={`font-semibold ${getScoreColorClass(token.believerScore)}`}>
-                              {token.believerScore ? token.believerScore.toFixed(2) : 'N/A'}
-                            </span>
-                          </div>
-                        </td>
-                        <td className="py-4 px-4 text-right font-medium">{formatMarketCap(token.marketCap)}</td>
-                        <td className="py-4 px-4 text-right font-medium">{token.walletCount?.toLocaleString() || 'N/A'}</td>
-                        <td className="py-4 px-4 text-right font-medium">{formatPercent(token.warpcastPercentage)}</td>
-                        <td className="py-4 px-4 text-right font-medium">{formatNumber(token.avgSocialCredScore)}</td>
-                        <td className="py-4 px-4 text-center">
-                          <button 
-                            onClick={() => router.push(`/tokens/${token.address}`)}
-                            className="px-4 py-1.5 bg-purple-800/30 text-purple-300 hover:bg-purple-800/50 rounded-md transition-all border border-purple-700/50 text-sm font-medium"
-                          >
-                            View Details
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
+                        View Details
+                      </button>
+                    </td>
+                  </tr>
+                ))}
 
-                    {currentTokens.length === 0 && (
-                      <tr>
-                        <td colSpan={7} className="py-12 text-center text-gray-400">
-                          No tokens found matching your criteria
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
+                {currentTokens.length === 0 && (
+                  <tr>
+                    <td colSpan={7} className="py-12 text-center text-gray-400">
+                      No tokens found matching your criteria
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+          
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex justify-between items-center p-4 border-t border-gray-800 bg-black/30">
+              <div className="text-sm text-gray-500">
+                Showing {indexOfFirstToken + 1}-{Math.min(indexOfLastToken, filteredTokens.length)} of {filteredTokens.length}
               </div>
-              
-              {/* Pagination */}
-              {totalPages > 1 && (
-                <div className="flex justify-between items-center p-4 border-t border-gray-800 bg-black/30">
-                  <div className="text-sm text-gray-500">
-                    Showing {indexOfFirstToken + 1}-{Math.min(indexOfLastToken, filteredTokens.length)} of {filteredTokens.length}
-                  </div>
-                  <div className="flex gap-1">
-                    <button
-                      onClick={() => paginate(Math.max(1, currentPage - 1))}
-                      disabled={currentPage === 1}
-                      className={`px-3 py-1 rounded-md ${currentPage === 1 ? 'text-gray-600 bg-black/20' : 'text-gray-300 bg-black/40 hover:bg-black/60'}`}
-                    >
-                      Previous
-                    </button>
-                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                      const pageNumber = currentPage > 3 ? 
-                        (currentPage - 2) + i : 
-                        i + 1;
-                        
-                      if (pageNumber <= totalPages) {
-                        return (
-                          <button
-                            key={pageNumber}
-                            onClick={() => paginate(pageNumber)}
-                            className={`px-3 py-1 rounded-md ${pageNumber === currentPage ? 'bg-purple-800/50 text-white' : 'bg-black/30 text-gray-400 hover:bg-black/50'}`}
-                          >
-                            {pageNumber}
-                          </button>
-                        );
-                      }
-                      return null;
-                    })}
-                    <button
-                      onClick={() => paginate(Math.min(totalPages, currentPage + 1))}
-                      disabled={currentPage === totalPages}
-                      className={`px-3 py-1 rounded-md ${currentPage === totalPages ? 'text-gray-600 bg-black/20' : 'text-gray-300 bg-black/40 hover:bg-black/60'}`}
-                    >
-                      Next
-                    </button>
-                  </div>
-                </div>
-              )}
+              <div className="flex gap-1">
+                <button
+                  onClick={() => paginate(Math.max(1, currentPage - 1))}
+                  disabled={currentPage === 1}
+                  className={`px-3 py-1 rounded-md ${currentPage === 1 ? 'text-gray-600 bg-black/20' : 'text-gray-300 bg-black/40 hover:bg-black/60'}`}
+                >
+                  Previous
+                </button>
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  const pageNumber = currentPage > 3 ? 
+                    (currentPage - 2) + i : 
+                    i + 1;
+                    
+                  if (pageNumber <= totalPages) {
+                    return (
+                      <button
+                        key={pageNumber}
+                        onClick={() => paginate(pageNumber)}
+                        className={`px-3 py-1 rounded-md ${pageNumber === currentPage ? 'bg-purple-800/50 text-white' : 'bg-black/30 text-gray-400 hover:bg-black/50'}`}
+                      >
+                        {pageNumber}
+                      </button>
+                    );
+                  }
+                  return null;
+                })}
+                <button
+                  onClick={() => paginate(Math.min(totalPages, currentPage + 1))}
+                  disabled={currentPage === totalPages}
+                  className={`px-3 py-1 rounded-md ${currentPage === totalPages ? 'text-gray-600 bg-black/20' : 'text-gray-300 bg-black/40 hover:bg-black/60'}`}
+                >
+                  Next
+                </button>
+              </div>
             </div>
           )}
-        </TabsContent>
-        
-        <TabsContent value="select-token">
-          <div className="bg-black/30 backdrop-blur-sm rounded-xl border border-gray-800 shadow-lg p-8 text-center">
-            <h3 className="text-xl font-semibold mb-4">Select a Token to View</h3>
-            <div className="flex flex-col items-center justify-center gap-6">
-              <p className="text-gray-400 max-w-md">
-                Choose a token from the &quot;All Tokens&quot; tab or search for a specific token to view detailed analysis
-              </p>
-              <button 
-                onClick={() => {
-                  // Find and click the "all-tokens" tab
-                  const allTokensTab = document.querySelector('[role="tab"][value="all-tokens"]') as HTMLElement;
-                  if (allTokensTab) {
-                    allTokensTab.click();
-                  }
-                }}
-                className="px-5 py-2.5 bg-purple-800/30 text-purple-300 hover:bg-purple-800/50 rounded-lg transition-all border border-purple-700/50 text-base font-medium"
-              >
-                View All Tokens
-              </button>
-            </div>
-          </div>
-        </TabsContent>
-      </Tabs>
+        </div>
+      )}
     </div>
   )
 }

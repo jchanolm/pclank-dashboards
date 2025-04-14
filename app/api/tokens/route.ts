@@ -8,10 +8,10 @@ export async function GET() {
     MATCH (token:Token)
     WITH token, token.marketCap AS marketCap
     // Calculate believer score without market cap factor first
-    MATCH (wallet:Wallet)-[r:HOLDS]->(token:Token)
+    MATCH (wallet:Wallet)-[holds:HOLDS]->(token:Token)
     WITH token, marketCap, count(wallet) AS num_wallets, collect(wallet) AS wallets
     // Count wallets connected to Warpcast
-    MATCH (w:Wallet)-[r:HOLDS]->(token)
+    MATCH (w:Wallet)-[:HOLDS]->(token)
     MATCH (w)-[:ACCOUNT*1..5]-(wc:Warpcast:Account)
     WITH token, marketCap, num_wallets, count(DISTINCT w) AS warpcast_wallets
     // Calculate percentage of wallets connected to Warpcast
@@ -50,7 +50,7 @@ export async function GET() {
          avgSocialCredScore
 
     // Calculate standard believer score
-    MATCH (wallet:Wallet)-[r:HOLDS]->(token)
+    MATCH (wallet:Wallet)-[:HOLDS]->(token)
     WITH token, marketCap, num_wallets, warpcast_wallets, warpcast_percentage, wallet, concentration_multiplier, avgSocialCredScore, total_balance
     OPTIONAL MATCH path = (wallet)-[:ACCOUNT*1..5]-(wc:Warpcast)
     WITH token, marketCap, num_wallets, warpcast_wallets, warpcast_percentage, wc, collect(DISTINCT wallet) AS wallet_group, concentration_multiplier, avgSocialCredScore, total_balance

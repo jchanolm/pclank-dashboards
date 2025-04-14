@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { TokenData } from '@/lib/types'
+import { TokenData, Believer } from '@/lib/types'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import {
   Table,
@@ -14,15 +14,6 @@ import {
   TableRow,
 } from "../../../components/ui/table"
 import { ExternalLink } from 'lucide-react'
-
-// Update Believer type to include balance
-interface Believer {
-  fid: number;
-  username: string;
-  bio: string;
-  fcred: number;
-  balance?: number;
-}
 
 export default function TokenDetailPage() {
   const [token, setToken] = useState<TokenData | null>(null)
@@ -143,10 +134,11 @@ export default function TokenDetailPage() {
 
   // Format token balance
   const formatBalance = (num: number | null | undefined): string => {
-    if (num === null || num === undefined) return 'N/A'
-    if (num >= 1000000) return `${(num / 1000000).toFixed(2)}M`
-    if (num >= 1000) return `${(num / 1000).toFixed(2)}K`
-    return num.toFixed(2)
+    if (num === null || num === undefined || isNaN(num)) return 'N/A';
+    if (num === 0) return '0';
+    if (num >= 1000000) return `${(num / 1000000).toFixed(2)}M`;
+    if (num >= 1000) return `${(num / 1000).toFixed(2)}K`;
+    return num.toFixed(2);
   }
 
   // Redirect to Warpcast profile
@@ -198,32 +190,32 @@ export default function TokenDetailPage() {
       <section className="mb-8">
         <h2 className="text-xl font-bold mb-4 text-gray-200">Key Metrics</h2>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          <div className="bg-black/30 backdrop-blur-sm rounded-xl p-4 border border-gray-800 shadow-lg">
+          <div className="bg-black/30 backdrop-blur-sm rounded-xl p-4 border border-gray-800 shadow-lg flex flex-col items-center text-center">
             <div className="text-gray-400 text-sm font-medium uppercase tracking-wider mb-1">MARKET CAP</div>
             <div className="text-2xl font-bold">{formatMarketCap(token.marketCap)}</div>
           </div>
           
-          <div className="bg-black/30 backdrop-blur-sm rounded-xl p-4 border border-gray-800 shadow-lg">
+          <div className="bg-black/30 backdrop-blur-sm rounded-xl p-4 border border-gray-800 shadow-lg flex flex-col items-center text-center">
             <div className="text-gray-400 text-sm font-medium uppercase tracking-wider mb-1">HOLDERS</div>
             <div className="text-2xl font-bold">{token.walletCount?.toLocaleString() || 'N/A'}</div>
           </div>
           
-          <div className="bg-black/30 backdrop-blur-sm rounded-xl p-4 border border-gray-800 shadow-lg">
+          <div className="bg-black/30 backdrop-blur-sm rounded-xl p-4 border border-gray-800 shadow-lg flex flex-col items-center text-center">
             <div className="text-gray-400 text-sm font-medium uppercase tracking-wider mb-1">SOCIAL HOLDERS</div>
             <div className="text-2xl font-bold">{token.warpcastWallets?.toLocaleString() || 'N/A'}</div>
           </div>
           
-          <div className="bg-black/30 backdrop-blur-sm rounded-xl p-4 border border-gray-800 shadow-lg">
-            <div className="text-gray-400 text-sm font-medium uppercase tracking-wider mb-1">% WALLETS CONNECTED TO WARPCAST</div>
+          <div className="bg-black/30 backdrop-blur-sm rounded-xl p-4 border border-gray-800 shadow-lg flex flex-col items-center text-center">
+            <div className="text-gray-400 text-sm font-medium uppercase tracking-wider mb-1">% WALLETS ON WARPCAST</div>
             <div className="text-2xl font-bold">{formatPercent(token.warpcastPercentage)}</div>
           </div>
           
-          <div className="bg-black/30 backdrop-blur-sm rounded-xl p-4 border border-gray-800 shadow-lg">
+          <div className="bg-black/30 backdrop-blur-sm rounded-xl p-4 border border-gray-800 shadow-lg flex flex-col items-center text-center">
             <div className="text-gray-400 text-sm font-medium uppercase tracking-wider mb-1">AVG SOCIAL CRED</div>
             <div className="text-2xl font-bold">{token.avgSocialCredScore?.toFixed(2) || 'N/A'}</div>
           </div>
           
-          <div className="bg-black/30 backdrop-blur-sm rounded-xl p-4 border border-gray-800 shadow-lg">
+          <div className="bg-black/30 backdrop-blur-sm rounded-xl p-4 border border-gray-800 shadow-lg flex flex-col items-center text-center">
             <div className="text-gray-400 text-sm font-medium uppercase tracking-wider mb-1">HOLDER/MCAP RATIO</div>
             <div className="text-2xl font-bold">{token.holderToMarketCapRatio?.toFixed(4) || 'N/A'}</div>
           </div>
@@ -234,7 +226,18 @@ export default function TokenDetailPage() {
       <section className="mb-8">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold text-gray-200">Holders w/Warpcast Account</h2>
-          <div className="text-sm text-gray-500">{believers.length} accounts</div>
+          <div className="flex items-center gap-4">
+            <div className="text-sm text-gray-500">{believers.length} accounts</div>
+            <a 
+              href={`https://dexscreener.com/base/${token.address}`} 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="px-4 py-2 bg-purple-800/30 text-purple-300 hover:bg-purple-800/50 rounded-lg transition-all border border-purple-700/50 flex items-center gap-2"
+            >
+              <span>View all Holders</span>
+              <ExternalLink size={14} />
+            </a>
+          </div>
         </div>
         
         <div className="bg-black/30 backdrop-blur-sm rounded-xl border border-gray-800 shadow-lg overflow-hidden">

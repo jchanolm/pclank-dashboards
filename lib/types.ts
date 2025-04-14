@@ -25,6 +25,7 @@ export interface TokenData {
     username: string;
     bio: string;
     fcred: number;
+    balance: number;
   }
   
   export interface BelieversResponse {
