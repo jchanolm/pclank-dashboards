@@ -131,7 +131,7 @@ export async function GET() {
               total_balance: total_balance
          }) AS all_token_data
 
-    // Normalize scores to 0-100
+    // Normalize scores to 0-80
     UNWIND all_token_data AS token_data
     WITH token_data.token AS token, 
          token_data.raw_score AS raw_believer_score,
@@ -147,10 +147,10 @@ export async function GET() {
          min_score, max_score
 
     WITH token, raw_believer_score, diversity_adjusted_score, market_adjusted_score, holder_mcap_ratio, marketCap, num_wallets, warpcast_wallets, warpcast_percentage, avgSocialCredScore, total_balance,
-         // Normalize to 0-100 scale
+         // Normalize to 0-80 scale
          CASE 
-              WHEN max_score = min_score THEN 50.0 // Default to middle value if all scores are equal
-              ELSE 100.0 * (market_adjusted_score - min_score) / (max_score - min_score)
+              WHEN max_score = min_score THEN 40.0 // Default to middle value if all scores are equal
+              ELSE 80.0 * (market_adjusted_score - min_score) / (max_score - min_score)
          END AS normalized_believer_score
     RETURN
         token.address AS address, 
