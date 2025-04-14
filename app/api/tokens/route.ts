@@ -54,9 +54,17 @@ export async function GET() {
     WITH token, marketCap, num_wallets, warpcast_wallets, warpcast_percentage, wallet, concentration_multiplier, avgSocialCredScore, total_balance
     OPTIONAL MATCH path = (wallet)-[:ACCOUNT*1..5]-(wc:Warpcast)
     WITH token, marketCap, num_wallets, warpcast_wallets, warpcast_percentage, wc, collect(DISTINCT wallet) AS wallet_group, concentration_multiplier, avgSocialCredScore, total_balance
+    // MODIFIED: Changed weight calculation to balance quantity vs quality without using ln()
+    // Plain holders count less (0.05) with sqrt scaling to reduce impact of large numbers
+    // Warpcast wallets get higher base value (0.1) plus full cred score
     WITH token, marketCap, num_wallets, warpcast_wallets, warpcast_percentage, wc, wallet_group, concentration_multiplier, avgSocialCredScore, total_balance,
-         CASE WHEN wc IS NULL THEN size(wallet_group)
-              ELSE 1 + coalesce(wc.fcCredScore, 0)
+         CASE 
+              WHEN wc IS NULL THEN 
+                   // Plain holders with sqrt scaling to reduce impact of just raw holder count
+                   0.05 * sqrt(toFloat(size(wallet_group)))
+              ELSE 
+                   // Warpcast holders with full cred score weight
+                   (0.1 + coalesce(wc.fcCredScore, 0))
          END AS group_weight
 
     // Calculate raw and diversity-adjusted believer scores
@@ -150,7 +158,7 @@ export async function GET() {
          // Normalize to 0-70 scale
          CASE 
               WHEN max_score = min_score THEN 40.0 // Default to middle value if all scores are equal
-              ELSE 70.0 * (market_adjusted_score - min_score) / (max_score - min_score)
+              ELSE 1.0 + 69.0 * (market_adjusted_score - min_score) / (max_score - min_score)
          END AS normalized_believer_score
     RETURN
         token.address AS address, 
